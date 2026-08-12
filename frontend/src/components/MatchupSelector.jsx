@@ -24,6 +24,8 @@ export default function MatchupSelector({
     .filter((ts) => ts.team_name === teamB)
     .map((ts) => ts.season);
 
+  const isSameTeamSeason = teamA === teamB && seasonA === seasonB;
+
   const handleSwap = () => {
     const tempT = teamA;
     const tempS = seasonA;
@@ -118,10 +120,16 @@ export default function MatchupSelector({
         </div>
       </div>
 
+      {isSameTeamSeason && (
+        <div className="validation-warning">
+          ⚠️ Cannot predict a matchup for the exact same team in the same season. Please select different teams or different seasons.
+        </div>
+      )}
+
       <button
         className="btn-predict"
         onClick={onPredict}
-        disabled={loading || !teamA || !seasonA || !teamB || !seasonB}
+        disabled={loading || isSameTeamSeason || !teamA || !seasonA || !teamB || !seasonB}
       >
         {loading ? 'Calculating Prediction...' : 'Generate Matchup Prediction'}
       </button>

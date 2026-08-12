@@ -37,7 +37,7 @@ class EloEngine:
             SELECT match_id, season, date, home_team, away_team, home_goals, away_goals, result
             FROM staging_matches
             WHERE home_goals IS NOT NULL AND away_goals IS NOT NULL
-            ORDER BY date ASC, match_id ASC
+            ORDER BY season ASC, match_id ASC
         """)
         matches = db.execute(query).mappings().all()
 

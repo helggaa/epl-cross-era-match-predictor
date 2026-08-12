@@ -173,6 +173,9 @@ class PredictorService:
         season_a = request.team_a_season
         season_b = request.team_b_season
 
+        if team_a == team_b and season_a == season_b:
+            raise ValueError("Cannot predict a matchup for the exact same team in the same season. Please select different teams or different seasons.")
+
         # Retrieve Elo ratings
         elo_a = elo_engine.get_elo(team_a, season_a)
         elo_b = elo_engine.get_elo(team_b, season_b)

@@ -1,8 +1,4 @@
 # EPL Dataset — Organized Output
-
-Built from your uploaded `datasetBola.zip` (three sources merged: FootyStats/Transfermarkt-style
-team-season files, Football-Data.co.uk match+odds files, and Understat xG data).
-
 ## Files
 
 ### `matches.csv` (13,401 rows, 1993–94 to 2025–26, 33 seasons)

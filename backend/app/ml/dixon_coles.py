@@ -26,7 +26,7 @@ def poisson_pmf(k: int, mu: float) -> float:
 
 
 class DixonColesModel:
-    def __init__(self, max_goals: int = 10, rho: float = -0.05):
+    def __init__(self, max_goals: int = 12, rho: float = -0.05):
         self.max_goals = max_goals
         self.rho = rho
 
@@ -42,29 +42,27 @@ class DixonColesModel:
         """
         Calculate expected goals and match outcome probabilities for Team A (Home) vs Team B (Away).
         """
-        # Base expected goals calculation using Elo rating gap and season attacking/defensive stats
         elo_diff = team_a_elo - team_b_elo
 
-        # Baseline expected goals
-        # Home advantage worth ~0.25 goal boost to home team
-        base_lambda = 1.35 * math.exp(elo_diff / 400.0 * 0.75 + 0.15)
-        base_mu = 1.05 * math.exp(-elo_diff / 400.0 * 0.75 - 0.15)
+        # Baseline Premier League expected goals: ~1.45 (Home) vs ~1.15 (Away)
+        # Moderate home advantage factor gamma = +0.08
+        base_lambda = 1.45 * math.exp((elo_diff / 400.0) * 0.65 + 0.08)
+        base_mu = 1.15 * math.exp(-(elo_diff / 400.0) * 0.65 - 0.08)
 
         # Incorporate actual season goal rates if available
         if team_a_gf_per_game is not None and team_b_ga_per_game is not None:
-            rate_factor_a = (team_a_gf_per_game / 1.4) * (team_b_ga_per_game / 1.4)
-            # Bound scaling factor
-            rate_factor_a = max(0.5, min(2.0, rate_factor_a))
-            base_lambda *= (0.7 + 0.3 * rate_factor_a)
+            rate_factor_a = (team_a_gf_per_game / 1.45) * (team_b_ga_per_game / 1.45)
+            rate_factor_a = max(0.4, min(2.5, rate_factor_a))
+            base_lambda *= (0.75 + 0.25 * rate_factor_a)
 
         if team_b_gf_per_game is not None and team_a_ga_per_game is not None:
-            rate_factor_b = (team_b_gf_per_game / 1.4) * (team_a_ga_per_game / 1.4)
-            rate_factor_b = max(0.5, min(2.0, rate_factor_b))
-            base_mu *= (0.7 + 0.3 * rate_factor_b)
+            rate_factor_b = (team_b_gf_per_game / 1.45) * (team_a_ga_per_game / 1.45)
+            rate_factor_b = max(0.4, min(2.5, rate_factor_b))
+            base_mu *= (0.75 + 0.25 * rate_factor_b)
 
-        # Ensure expected goals are within realistic football bounds [0.2, 5.0]
-        exp_home_goals = round(max(0.2, min(5.0, base_lambda)), 3)
-        exp_away_goals = round(max(0.2, min(5.0, base_mu)), 3)
+        # Realistic expected goals bounds [0.1, 7.0]
+        exp_home_goals = round(max(0.1, min(7.0, base_lambda)), 3)
+        exp_away_goals = round(max(0.1, min(7.0, base_mu)), 3)
 
         # Compute bivariate probability distribution matrix
         home_win_prob = 0.0

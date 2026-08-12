@@ -53,3 +53,15 @@ def test_predict_endpoint_performance_and_accuracy(client: TestClient, db_sessio
     pred_id = data["prediction_id"]
     db_count = db_session.execute(text("SELECT COUNT(*) FROM predictions WHERE prediction_id = :id"), {"id": pred_id}).scalar()
     assert db_count == 1
+
+
+def test_predict_same_team_same_season_rejected(client: TestClient):
+    payload = {
+        "team_a_id": "Liverpool",
+        "team_a_season": "2019-2020",
+        "team_b_id": "Liverpool",
+        "team_b_season": "2019-2020"
+    }
+    response = client.post(f"{settings.API_V1_STR}/predict", json=payload)
+    assert response.status_code == 400
+    assert "same team in the same season" in response.json()["detail"]
