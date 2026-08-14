@@ -13,12 +13,14 @@ class Settings(BaseSettings):
     # CORS Configuration
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
 
-    # Anthropic API Key & Model (optional)
+    # Gemini / Anthropic API Key & Model (optional)
+    GEMINI_API_KEY: str | None = None
+    GOOGLE_API_KEY: str | None = None
     ANTHROPIC_API_KEY: str | None = None
-    LLM_MODEL: str = "claude-3-5-haiku-20241022"
+    LLM_MODEL: str = "gemini-flash-latest"
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=("../.env", ".env"),
         env_file_encoding="utf-8",
         extra="ignore"
     )

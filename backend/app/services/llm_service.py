@@ -1,11 +1,15 @@
 import json
 import logging
+import os
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from sqlalchemy.orm import Session
-from sqlalchemy import text
+import httpx
 
-import anthropic
+try:
+    import anthropic
+except ImportError:
+    anthropic = None
 
 from app.core.config import settings
 from app.models.app_models import Prediction, HypotheticalMatchup, PredictionExplanation, PredictionNarrative
@@ -13,23 +17,54 @@ from app.schemas.explanation import ExplanationResponse, ExplanationNarrative
 
 logger = logging.getLogger("llm_explanation_service")
 
-SYSTEM_PROMPT = """You are a football match-analysis assistant. You will be given structured data about a predicted matchup between two Premier League team-seasons, including the model's win/draw/loss probabilities and a ranked list of the statistical factors that drove the prediction.
+SYSTEM_PROMPT = """You are a legendary football pundit with deep Premier League knowledge, sharp tactical insight, and a dry sense of humor. You will be given structured data about a predicted cross-era matchup between two Premier League team-seasons, including probabilities and the statistical factors that drove the prediction.
 
 RULES — follow these exactly:
-1. Use ONLY the facts given in the input JSON. Do not invent statistics, injuries, transfers, tactical details, or historical facts that are not present in the input.
-2. If a fact is missing (e.g. no xG data because the season predates 2014-15), do not guess or fill the gap with plausible-sounding football knowledge — simply omit that angle.
-3. Write in plain, confident sports-analysis prose — no hedging phrases like "the model suggests" in every sentence; state the grounded facts directly.
-4. Produce exactly four short sections as specified in the OUTPUT FORMAT below. Each section is 2-4 sentences.
-5. Do not mention "SHAP", "feature importance", or any modeling terminology in the output — translate feature names into natural football language (e.g. "elo_diff" -> "overall squad strength", "home_xg_avg_last5" -> "recent attacking output at home").
-6. If the input marks the prediction as "reduced_confidence": true, add one final sentence noting that this era of data has less detailed statistics available, without being apologetic about it.
+1. Use the facts given in the input JSON as your statistical foundation. You MAY enrich the analysis with well-known historical facts about that specific team-season (e.g. trophy wins, famous players, iconic tactics, manager identity, league position) — but NEVER fabricate statistics or numbers that aren't in the input.
+2. If xG data is missing (pre-2014 seasons), do not invent xG numbers — talk about what IS available.
+3. Write in confident, entertaining sports-pundit prose. Mix sharp tactical analysis with occasional humor, pop-culture references, or football memes where they fit naturally. Don't force jokes — let them land when the matchup calls for it.
+4. Produce exactly four sections. Each section MUST be a JSON array of 4-11 bullet-point strings. No more than 11 bullets per section. Each bullet is one distinct reason or angle — be specific, not generic.
+5. Do NOT mention "SHAP", "feature importance", or modeling terminology. Translate features into natural football language (e.g. "elo_diff" → "overall squad pedigree", "gf_per_game" → "goals-per-game average").
+6. Each bullet should feel like a standalone insight a pundit would make on TV — punchy, specific, and grounded.
+7. If "reduced_confidence" is true, include one bullet noting the era has sparser data, framed naturally.
 
-OUTPUT FORMAT (return as JSON):
+OUTPUT FORMAT (return as valid JSON — each value is an ARRAY of strings, maximum 11 items each):
 {
-  "why_team_a_wins": "...",
-  "why_team_a_loses": "...",
-  "why_team_b_wins": "...",
-  "why_team_b_loses": "..."
+  "why_team_a_wins": ["reason 1", "reason 2", "...", "reason N (max 11)"],
+  "why_team_a_loses": ["reason 1", "reason 2", "...", "reason N (max 11)"],
+  "why_team_b_wins": ["reason 1", "reason 2", "...", "reason N (max 11)"],
+  "why_team_b_loses": ["reason 1", "reason 2", "...", "reason N (max 11)"]
 }"""
+
+
+MAX_REASONS = 11
+
+
+def _ensure_list(val) -> list:
+    """Convert string or list narrative value to a list of strings, capped at MAX_REASONS."""
+    if isinstance(val, list):
+        return val[:MAX_REASONS]
+    if isinstance(val, str) and val.strip():
+        return [val]
+    return []
+
+
+def _list_to_str(val: list) -> str:
+    """Serialize a list of reasons to a JSON string for DB storage."""
+    return json.dumps(val, ensure_ascii=False)
+
+
+def _str_to_list(val: str | None) -> list:
+    """Deserialize a DB-stored JSON string back to a list."""
+    if not val:
+        return []
+    try:
+        parsed = json.loads(val)
+        if isinstance(parsed, list):
+            return parsed
+        return [str(parsed)]
+    except (json.JSONDecodeError, TypeError):
+        return [val] if val.strip() else []
 
 
 class LLMExplanationService:
@@ -46,10 +81,10 @@ class LLMExplanationService:
                 narrative_available=True,
                 llm_model=existing.llm_model,
                 narratives=ExplanationNarrative(
-                    why_team_a_wins=existing.narrative_team_a_win or "",
-                    why_team_a_loses=existing.narrative_team_a_lose or "",
-                    why_team_b_wins=existing.narrative_team_b_win or "",
-                    why_team_b_loses=existing.narrative_team_b_lose or "",
+                    why_team_a_wins=_str_to_list(existing.narrative_team_a_win),
+                    why_team_a_loses=_str_to_list(existing.narrative_team_a_lose),
+                    why_team_b_wins=_str_to_list(existing.narrative_team_b_win),
+                    why_team_b_loses=_str_to_list(existing.narrative_team_b_lose),
                 ),
                 generated_at=existing.generated_at,
                 status_message="Retrieved stored narrative from database record."
@@ -64,17 +99,19 @@ class LLMExplanationService:
                 status_message=f"Prediction ID '{prediction_id}' not found."
             )
 
-        # 2. Check if Anthropic API Key is configured
-        api_key = settings.ANTHROPIC_API_KEY
-        if not api_key or not api_key.strip():
-            logger.info(f"Anthropic API key unconfigured. Returning unconfigured status for prediction_id {prediction_id}.")
+        # 2. Check available API keys
+        gemini_key = settings.GEMINI_API_KEY or settings.GOOGLE_API_KEY or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+        anthropic_key = settings.ANTHROPIC_API_KEY or os.getenv("ANTHROPIC_API_KEY")
+
+        if not gemini_key and not anthropic_key:
+            logger.info(f"LLM API key unconfigured. Returning unconfigured status for prediction_id {prediction_id}.")
             return ExplanationResponse(
                 prediction_id=prediction_id,
                 narrative_available=False,
                 status_message="LLM explanation service is unconfigured or unavailable. Statistical prediction remains fully valid."
             )
 
-        # 3. Build payload for Anthropic API
+        # 3. Build structured payload
         hyp = db.query(HypotheticalMatchup).filter(HypotheticalMatchup.hypothetical_id == pred.hypothetical_id).first()
         exps = db.query(PredictionExplanation).filter(PredictionExplanation.prediction_id == prediction_id).all()
 
@@ -116,41 +153,98 @@ class LLMExplanationService:
             "reduced_confidence": reduced_confidence
         }
 
-        # 4. Invoke Anthropic API safely
+        # 4. Invoke LLM Provider (Google Gemini preferred, Anthropic fallback)
         try:
-            client = anthropic.Anthropic(api_key=api_key)
-            response = client.messages.create(
-                model=settings.LLM_MODEL,
-                max_tokens=1000,
-                system=SYSTEM_PROMPT,
-                messages=[
-                    {"role": "user", "content": json.dumps(user_payload, indent=2)}
-                ]
-            )
+            narrative_json = None
+            used_model = settings.LLM_MODEL
 
-            response_text = response.content[0].text.strip()
-            # Handle markdown fenced block stripping
-            if response_text.startswith("```json"):
-                response_text = response_text[7:]
-            if response_text.endswith("```"):
-                response_text = response_text[:-3]
+            if gemini_key:
+                # Model fallback chain — if primary is overloaded (503), try alternatives
+                primary = settings.LLM_MODEL if ("gemini" in settings.LLM_MODEL and "2.0" not in settings.LLM_MODEL) else "gemini-flash-latest"
+                fallback_models = [primary, "gemini-3.5-flash", "gemini-3.6-flash", "gemini-3.1-flash-lite"]
+                # Deduplicate while preserving order
+                seen = set()
+                models_to_try = []
+                for m in fallback_models:
+                    if m not in seen:
+                        seen.add(m)
+                        models_to_try.append(m)
 
-            narrative_json = json.loads(response_text)
+                prompt_text = f"{SYSTEM_PROMPT}\n\nINPUT DATA:\n{json.dumps(user_payload, indent=2)}"
 
-            why_a_win = narrative_json.get("why_team_a_wins", "")
-            why_a_lose = narrative_json.get("why_team_a_loses", "")
-            why_b_win = narrative_json.get("why_team_b_wins", "")
-            why_b_lose = narrative_json.get("why_team_b_loses", "")
+                request_body = {
+                    "contents": [
+                        {
+                            "role": "user",
+                            "parts": [{"text": prompt_text}]
+                        }
+                    ],
+                    "generationConfig": {
+                        "temperature": 0.7,
+                        "responseMimeType": "application/json"
+                    }
+                }
 
-            # 5. Persist into prediction_narratives database table
+                last_error = None
+                with httpx.Client(timeout=30.0) as client:
+                    for model_name in models_to_try:
+                        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={gemini_key.strip()}"
+                        try:
+                            resp = client.post(gemini_url, json=request_body)
+                            if resp.status_code == 200:
+                                data = resp.json()
+                                candidates = data.get("candidates", [])
+                                if candidates:
+                                    response_text = candidates[0]["content"]["parts"][0]["text"].strip()
+                                    narrative_json = json.loads(response_text)
+                                    used_model = model_name
+                                    logger.info(f"✓ Gemini model '{model_name}' returned successfully.")
+                                    break
+                            else:
+                                last_error = f"{model_name} returned {resp.status_code}"
+                                logger.warning(f"Gemini model '{model_name}' returned {resp.status_code}, trying next fallback...")
+                        except Exception as model_err:
+                            last_error = str(model_err)
+                            logger.warning(f"Gemini model '{model_name}' failed: {model_err}, trying next fallback...")
+
+                if not narrative_json and last_error:
+                    raise RuntimeError(f"All Gemini models failed. Last error: {last_error}")
+
+            elif anthropic_key and anthropic:
+                used_model = settings.LLM_MODEL if "claude" in settings.LLM_MODEL else "claude-3-5-haiku-20241022"
+                client = anthropic.Anthropic(api_key=anthropic_key)
+                response = client.messages.create(
+                    model=used_model,
+                    max_tokens=2000,
+                    system=SYSTEM_PROMPT,
+                    messages=[
+                        {"role": "user", "content": json.dumps(user_payload, indent=2)}
+                    ]
+                )
+                response_text = response.content[0].text.strip()
+                if response_text.startswith("```json"):
+                    response_text = response_text[7:]
+                if response_text.endswith("```"):
+                    response_text = response_text[:-3]
+                narrative_json = json.loads(response_text)
+
+            if not narrative_json:
+                raise RuntimeError("Failed to parse LLM response JSON")
+
+            why_a_win = _ensure_list(narrative_json.get("why_team_a_wins", []))
+            why_a_lose = _ensure_list(narrative_json.get("why_team_a_loses", []))
+            why_b_win = _ensure_list(narrative_json.get("why_team_b_wins", []))
+            why_b_lose = _ensure_list(narrative_json.get("why_team_b_loses", []))
+
+            # 5. Persist into prediction_narratives database table (stored as JSON strings)
             now = datetime.utcnow()
             narrative_db = PredictionNarrative(
                 prediction_id=prediction_id,
-                llm_model=settings.LLM_MODEL,
-                narrative_team_a_win=why_a_win,
-                narrative_team_a_lose=why_a_lose,
-                narrative_team_b_win=why_b_win,
-                narrative_team_b_lose=why_b_lose,
+                llm_model=used_model,
+                narrative_team_a_win=_list_to_str(why_a_win),
+                narrative_team_a_lose=_list_to_str(why_a_lose),
+                narrative_team_b_win=_list_to_str(why_b_win),
+                narrative_team_b_lose=_list_to_str(why_b_lose),
                 generated_at=now
             )
             db.add(narrative_db)
@@ -159,7 +253,7 @@ class LLMExplanationService:
             return ExplanationResponse(
                 prediction_id=prediction_id,
                 narrative_available=True,
-                llm_model=settings.LLM_MODEL,
+                llm_model=used_model,
                 narratives=ExplanationNarrative(
                     why_team_a_wins=why_a_win,
                     why_team_a_loses=why_a_lose,
@@ -170,7 +264,7 @@ class LLMExplanationService:
                 status_message="Successfully generated and stored narrative."
             )
         except Exception as err:
-            logger.warning(f"Anthropic API call failed or timed out: {err}. Graceful fallback activated.")
+            logger.warning(f"LLM API call failed or timed out: {err}. Graceful fallback activated.")
             return ExplanationResponse(
                 prediction_id=prediction_id,
                 narrative_available=False,

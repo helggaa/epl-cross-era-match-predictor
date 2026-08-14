@@ -4,13 +4,18 @@ export default function DataHonestyBadge({ reducedConfidence }) {
   if (reducedConfidence === undefined || reducedConfidence === null) return null;
 
   return (
-    <div className={`data-honesty-badge ${reducedConfidence ? 'limited' : 'full'}`}>
-      <span className="badge-icon">{reducedConfidence ? 'ℹ️' : '⚡'}</span>
-      <span className="badge-text">
+    <div className={`data-honesty-banner ${reducedConfidence ? 'banner-limited' : 'banner-full'}`}>
+      <div className="honesty-indicator">
+        <span className="honesty-dot"></span>
+        <span className="honesty-tag">
+          {reducedConfidence ? 'HISTORICAL ERA DATA BASELINE' : 'FULL OPTA xG INTEGRATION'}
+        </span>
+      </div>
+      <p className="honesty-desc">
         {reducedConfidence
-          ? "Limited data coverage — xG and advanced statistics are unavailable for at least one selected season. The prediction uses the historical features available for that era."
-          : "xG-supported data available — advanced match statistics are available for the selected matchup."}
-      </span>
+          ? 'Limited data coverage — Advanced xG tracking is unavailable for at least one selected season. Dixon-Coles model utilizes all available historical shot & goal-scoring features for that era.'
+          : 'xG-supported match data — Advanced expected goals (xG), shot efficiency, and deep tactical features are fully active for this matchup.'}
+      </p>
     </div>
   );
 }
