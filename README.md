@@ -1,83 +1,89 @@
-# EPL Cross-Era Match Predictor
+# EPL Cross-Era Match Predictor ⚽⚡
 
-Production-oriented Premier League cross-era match predictor built with FastAPI, PostgreSQL, pandas/scikit-learn/scipy modeling, and React.
-
-## Features
-- **Cross-Era Elo & Dixon-Coles Predictor**: Predict home win, draw, and away win probabilities for any two EPL team-seasons (1993-94 to 2025-26).
-- **Grounded AI Explanations**: Layer 2 LLM natural language explanations using Anthropic Claude API (completely optional - core prediction runs 100% free & offline).
-- **Approximated Event Simulation**: Layer 3 minute-by-minute simulation using Dixon-Coles scoreline sampling and player event rates.
-- **Zero Mandatory Paid Services**: 100% self-hostable via Docker Compose.
+A statistical machine-learning prediction engine and broadcast-grade simulation interface for hypothetical cross-era Premier League matchups across 34 seasons of English football (1992–93 to 2025–26).
 
 ---
 
-## Quick Start (Phase 0 Setup)
+## 🌟 Key Features
 
-### Prerequisites
-- Docker & Docker Compose
+- **Cross-Era Elo & Dixon-Coles Probability Engine**: Bivariate Poisson model calibrated with chronological Elo ratings to simulate match outcomes, win/draw/loss probabilities, and modeled expected scorelines.
+- **TV Studio AI Pundit Breakdown**: Layer 2 tactical analysis powered by Google Gemini (Free Tier) generating multi-bullet pundit breakdowns with tactical micro-tags and football cultural context.
+- **Broadcast-Grade UI/UX**: Premier League stadium dark theme with authentic club colors, iconic clash presets (*Invincibles vs Centurions*, *Treble Royale*), and digital LED scoreboards.
+- **100% Free & Offline-Resilient**: Core statistical predictions run 100% offline and free without requiring any API keys.
+
+---
+
+## 🚀 Quick Start
+
+### 1. Prerequisites
 - Python 3.11+
 - Node.js 18+ & npm
+- PostgreSQL (or local SQLite)
 
-### Local Environment Setup
+### 2. Backend Setup
+```bash
+cd backend
+python -m venv .venv
 
-1. Copy `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
+# Windows
+.\.venv\Scripts\Activate.ps1
+# macOS / Linux
+source .venv/bin/activate
 
-2. Start PostgreSQL via Docker Compose:
-   ```bash
-   docker-compose up db -d
-   ```
+pip install -r requirements.txt
 
-3. Setup Python Virtual Environment:
-   ```bash
-   cd backend
-   python -m venv .venv
-   # Windows PowerShell:
-   .venv\Scripts\Activate.ps1
-   # Linux/macOS:
-   source .venv/bin/activate
+# Run migrations & seed data
+alembic upgrade head
+python scripts/load_data.py
 
-   pip install -r requirements.txt
-   ```
+# Start FastAPI server
+uvicorn app.main:app --reload --port 8000
+```
 
-4. Run Database Migrations (Alembic):
-   ```bash
-   alembic upgrade head
-   ```
+### 3. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-5. Ingest CSV Datasets into Staging Tables:
-   ```bash
-   python scripts/load_data.py
-   ```
-
-6. Run Backend Tests:
-   ```bash
-   pytest tests/
-   ```
+Visit **`http://localhost:5173`** in your browser.
 
 ---
 
-## Repository Structure
+## 🧪 Testing
+
+```bash
+cd backend
+pytest tests/ -v
+```
+
+---
+
+## 📁 Architecture
+
 ```text
 /
 ├── backend/
 │   ├── app/
-│   │   ├── api/
-│   │   ├── core/
-│   │   ├── db/
-│   │   ├── models/
-│   │   ├── schemas/
-│   │   └── main.py
-│   ├── migrations/
-│   ├── scripts/
-│   │   └── load_data.py
-│   ├── tests/
-│   └── requirements.txt
+│   │   ├── api/v1/         # FastAPI endpoint routers (predict, teams, explanation)
+│   │   ├── core/           # Configuration & environment settings
+│   │   ├── db/             # Database session & models
+│   │   ├── ml/             # Dixon-Coles model & Elo rating engine
+│   │   └── services/       # Predictor & LLM explanation services
+│   ├── migrations/         # Alembic database migrations
+│   └── tests/              # Pytest test suite
 ├── frontend/
-├── data/
-├── docker-compose.yml
-├── .env.example
-├── .gitignore
+│   ├── src/
+│   │   ├── components/     # MatchupSelector, ProbabilityDisplay, PunditBoard
+│   │   ├── services/       # Axios/fetch API layer
+│   │   └── utils/          # Team metadata & clash presets
+│   └── index.html
+├── data/                   # 34 seasons match & player statistics datasets
 └── README.md
 ```
+
+---
+
+## 📄 License
+MIT License.
