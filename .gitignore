@@ -2,6 +2,11 @@
 .env
 .env.local
 
+# Internal / Private Documentation (Local only)
+SDD_*.md
+IMPLEMENTATION_RULES.md
+llm_prompts.md
+
 # Python
 __pycache__/
 *.py[cod]
