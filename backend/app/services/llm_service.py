@@ -17,27 +17,31 @@ from app.schemas.explanation import ExplanationResponse, ExplanationNarrative
 
 logger = logging.getLogger("llm_explanation_service")
 
-SYSTEM_PROMPT = """You are a legendary football pundit with deep Premier League knowledge, sharp tactical insight, and a dry sense of humor. You will be given structured data about a predicted cross-era matchup between two Premier League team-seasons, including probabilities and the statistical factors that drove the prediction.
+# Persistent HTTP Client with Keepalive Connection Pooling for fast SSL/TCP reuse
+_http_client = httpx.Client(
+    timeout=15.0,
+    limits=httpx.Limits(max_keepalive_connections=10, max_connections=20)
+)
 
-RULES — follow these exactly:
-1. Use the facts given in the input JSON as your statistical foundation. You MAY enrich the analysis with well-known historical facts about that specific team-season (e.g. trophy wins, famous players, iconic tactics, manager identity, league position) — but NEVER fabricate statistics or numbers that aren't in the input.
-2. If xG data is missing (pre-2014 seasons), do not invent xG numbers — talk about what IS available.
-3. Write in confident, entertaining sports-pundit prose. Mix sharp tactical analysis with occasional humor, pop-culture references, or football memes where they fit naturally. Don't force jokes — let them land when the matchup calls for it.
-4. Produce exactly four sections. Each section MUST be a JSON array of 4-11 bullet-point strings. No more than 11 bullets per section. Each bullet is one distinct reason or angle — be specific, not generic.
-5. Do NOT mention "SHAP", "feature importance", or modeling terminology. Translate features into natural football language (e.g. "elo_diff" → "overall squad pedigree", "gf_per_game" → "goals-per-game average").
-6. Each bullet should feel like a standalone insight a pundit would make on TV — punchy, specific, and grounded.
-7. If "reduced_confidence" is true, include one bullet noting the era has sparser data, framed naturally.
+SYSTEM_PROMPT = """You are an elite Premier League tactical analyst and pundit with deep historical knowledge across 1992–2026. You will be given structured data about a predicted cross-era matchup between two Premier League team-seasons, including probabilities and key statistical metrics.
 
-OUTPUT FORMAT (return as valid JSON — each value is an ARRAY of strings, maximum 11 items each):
+RULES:
+1. Use the facts given in the input JSON as your statistical foundation. Enrich the analysis with well-known historical facts about that specific team-season (e.g. key players, tactical setup, manager philosophy, league record). Never fabricate fake statistics.
+2. If xG data is missing (pre-2014 seasons), discuss traditional goal output, defensive resilience, and pressing style without inventing xG numbers.
+3. Write concise, punchy, expert tactical insights in clean broadcast prose.
+4. Produce exactly four sections. Each section MUST be a JSON array of 3 to 4 distinct, high-impact bullet-point strings (max 4 per section). Each bullet must be specific and grounded.
+5. Do NOT mention "SHAP", "feature importance", or machine learning jargon. Translate metrics into football terminology.
+6. If "reduced_confidence" is true, include one bullet noting the historical era context naturally.
+
+OUTPUT FORMAT (return valid JSON with max 4 items per array):
 {
-  "why_team_a_wins": ["reason 1", "reason 2", "...", "reason N (max 11)"],
-  "why_team_a_loses": ["reason 1", "reason 2", "...", "reason N (max 11)"],
-  "why_team_b_wins": ["reason 1", "reason 2", "...", "reason N (max 11)"],
-  "why_team_b_loses": ["reason 1", "reason 2", "...", "reason N (max 11)"]
+  "why_team_a_wins": ["point 1", "point 2", "point 3", "point 4"],
+  "why_team_a_loses": ["point 1", "point 2", "point 3", "point 4"],
+  "why_team_b_wins": ["point 1", "point 2", "point 3", "point 4"],
+  "why_team_b_loses": ["point 1", "point 2", "point 3", "point 4"]
 }"""
 
-
-MAX_REASONS = 11
+MAX_REASONS = 8
 
 
 def _ensure_list(val) -> list:
@@ -75,7 +79,7 @@ class LLMExplanationService:
         # 1. Check prediction_narratives database cache
         existing = db.query(PredictionNarrative).filter(PredictionNarrative.prediction_id == prediction_id).first()
         if existing:
-            logger.info(f"✓ Cache hit for prediction_id {prediction_id} in prediction_narratives database table.")
+            logger.info(f"✓ Database cache hit for prediction_id {prediction_id}")
             return ExplanationResponse(
                 prediction_id=prediction_id,
                 narrative_available=True,
@@ -159,10 +163,8 @@ class LLMExplanationService:
             used_model = settings.LLM_MODEL
 
             if gemini_key:
-                # Model fallback chain — if primary is overloaded (503), try alternatives
-                primary = settings.LLM_MODEL if ("gemini" in settings.LLM_MODEL and "2.0" not in settings.LLM_MODEL) else "gemini-flash-latest"
-                fallback_models = [primary, "gemini-3.5-flash", "gemini-3.6-flash", "gemini-3.1-flash-lite"]
-                # Deduplicate while preserving order
+                primary = settings.LLM_MODEL or "gemini-flash-lite-latest"
+                fallback_models = [primary, "gemini-flash-lite-latest", "gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-flash-latest"]
                 seen = set()
                 models_to_try = []
                 for m in fallback_models:
@@ -180,32 +182,32 @@ class LLMExplanationService:
                         }
                     ],
                     "generationConfig": {
-                        "temperature": 0.7,
+                        "temperature": 0.55,
+                        "maxOutputTokens": 800,
                         "responseMimeType": "application/json"
                     }
                 }
 
                 last_error = None
-                with httpx.Client(timeout=30.0) as client:
-                    for model_name in models_to_try:
-                        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={gemini_key.strip()}"
-                        try:
-                            resp = client.post(gemini_url, json=request_body)
-                            if resp.status_code == 200:
-                                data = resp.json()
-                                candidates = data.get("candidates", [])
-                                if candidates:
-                                    response_text = candidates[0]["content"]["parts"][0]["text"].strip()
-                                    narrative_json = json.loads(response_text)
-                                    used_model = model_name
-                                    logger.info(f"✓ Gemini model '{model_name}' returned successfully.")
-                                    break
-                            else:
-                                last_error = f"{model_name} returned {resp.status_code}"
-                                logger.warning(f"Gemini model '{model_name}' returned {resp.status_code}, trying next fallback...")
-                        except Exception as model_err:
-                            last_error = str(model_err)
-                            logger.warning(f"Gemini model '{model_name}' failed: {model_err}, trying next fallback...")
+                for model_name in models_to_try:
+                    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={gemini_key.strip()}"
+                    try:
+                        resp = _http_client.post(gemini_url, json=request_body)
+                        if resp.status_code == 200:
+                            data = resp.json()
+                            candidates = data.get("candidates", [])
+                            if candidates:
+                                response_text = candidates[0]["content"]["parts"][0]["text"].strip()
+                                narrative_json = json.loads(response_text)
+                                used_model = model_name
+                                logger.info(f"✓ Gemini model '{model_name}' returned in fast execution.")
+                                break
+                        else:
+                            last_error = f"{model_name} returned status {resp.status_code}"
+                            logger.warning(f"Gemini model '{model_name}' returned {resp.status_code}, trying next model...")
+                    except Exception as model_err:
+                        last_error = str(model_err)
+                        logger.warning(f"Gemini model '{model_name}' failed: {model_err}, trying next model...")
 
                 if not narrative_json and last_error:
                     raise RuntimeError(f"All Gemini models failed. Last error: {last_error}")
@@ -215,7 +217,7 @@ class LLMExplanationService:
                 client = anthropic.Anthropic(api_key=anthropic_key)
                 response = client.messages.create(
                     model=used_model,
-                    max_tokens=2000,
+                    max_tokens=800,
                     system=SYSTEM_PROMPT,
                     messages=[
                         {"role": "user", "content": json.dumps(user_payload, indent=2)}
@@ -236,7 +238,7 @@ class LLMExplanationService:
             why_b_win = _ensure_list(narrative_json.get("why_team_b_wins", []))
             why_b_lose = _ensure_list(narrative_json.get("why_team_b_loses", []))
 
-            # 5. Persist into prediction_narratives database table (stored as JSON strings)
+            # 5. Persist into prediction_narratives database table
             now = datetime.utcnow()
             narrative_db = PredictionNarrative(
                 prediction_id=prediction_id,
@@ -263,6 +265,7 @@ class LLMExplanationService:
                 generated_at=now,
                 status_message="Successfully generated and stored narrative."
             )
+
         except Exception as err:
             logger.warning(f"LLM API call failed or timed out: {err}. Graceful fallback activated.")
             return ExplanationResponse(

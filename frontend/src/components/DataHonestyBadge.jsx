@@ -8,13 +8,13 @@ export default function DataHonestyBadge({ reducedConfidence }) {
       <div className="honesty-indicator">
         <span className="honesty-dot"></span>
         <span className="honesty-tag">
-          {reducedConfidence ? 'HISTORICAL ERA DATA BASELINE' : 'FULL OPTA xG INTEGRATION'}
+          {reducedConfidence ? 'DATA COVERAGE: HISTORICAL STATISTICAL BASELINE' : 'DATA COVERAGE: FULL xG & TACTICAL METRICS'}
         </span>
       </div>
       <p className="honesty-desc">
         {reducedConfidence
-          ? 'Limited data coverage — Advanced xG tracking is unavailable for at least one selected season. Dixon-Coles model utilizes all available historical shot & goal-scoring features for that era.'
-          : 'xG-supported match data — Advanced expected goals (xG), shot efficiency, and deep tactical features are fully active for this matchup.'}
+          ? 'Granular tracking metrics (xG, press sequences) are unavailable for older historical eras. The model utilizes comprehensive goal rates, match results, and era-calibrated Elo parameters.'
+          : 'Full advanced match tracking active. Predictions incorporate expected goals (xG), shot efficiency distributions, and detailed team metrics.'}
       </p>
     </div>
   );

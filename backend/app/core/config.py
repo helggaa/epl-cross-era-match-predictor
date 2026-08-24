@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str | None = None
     GOOGLE_API_KEY: str | None = None
     ANTHROPIC_API_KEY: str | None = None
-    LLM_MODEL: str = "gemini-flash-latest"
+    LLM_MODEL: str = "gemini-flash-lite-latest"
 
     model_config = SettingsConfigDict(
         env_file=("../.env", ".env"),

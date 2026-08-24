@@ -3,22 +3,21 @@ import React from 'react';
 export default function Header() {
   return (
     <header className="header">
-      <div className="header-top-banner">
-        <span className="live-engine-tag">
-          <span className="pulse-dot"></span> 34 SEASONS ARCHIVE • 1992–2026
+      <div className="header-meta-row">
+        <span className="header-meta-item">
+          <span className="status-dot"></span> Historical Archive 1992–2026
         </span>
-        <span className="model-chip">DIXON-COLES + CHRONO ELO</span>
+        <span className="meta-divider">•</span>
+        <span className="header-meta-item">34 Seasons</span>
+        <span className="meta-divider">•</span>
+        <span className="header-meta-item">Dixon-Coles & Dynamic Elo</span>
       </div>
 
-      <div className="header-container">
-        <div className="brand">
-          <div className="brand-badge-wrapper">
-            <span className="brand-badge">PREMIER LEAGUE</span>
-          </div>
-          <h1 className="brand-title">Cross-Era Match Predictor</h1>
-        </div>
-        <p className="header-subtitle">
-          Simulate hypothetical clashes between legendary Premier League sides across 30+ years of football history.
+      <div className="header-brand">
+        <div className="brand-category">PREMIER LEAGUE ANALYTICS</div>
+        <h1 className="brand-title">Cross-Era Match Predictor</h1>
+        <p className="brand-subtitle">
+          Simulate historical Premier League matchups using bivariate Poisson goal modeling and era-adjusted Elo ratings.
         </p>
       </div>
     </header>

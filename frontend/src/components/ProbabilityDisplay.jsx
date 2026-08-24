@@ -31,26 +31,30 @@ export default function ProbabilityDisplay({ prediction }) {
     predicted_away_goals !== null;
 
   return (
-    <div className="card probability-card glass-panel">
+    <div className="card probability-card">
       <div className="card-header-bar">
         <div>
-          <span className="card-tag">BROADCAST PROJECTION</span>
+          <span className="card-tag">MODEL PROJECTION</span>
           <h2 className="card-title">Match Outcome Probabilities</h2>
         </div>
         <div className="elo-diff-pill">
-          <span className="elo-diff-label">Elo Delta:</span>
-          <span className="elo-diff-val" style={{ color: eloFavorsA ? 'var(--epl-green)' : 'var(--epl-magenta)' }}>
-            {eloFavorsA ? `+${eloDiff} ${team_a.name}` : `+${Math.abs(eloDiff)} ${team_b.name}`}
+          <span className="elo-diff-label">Elo Rating Delta:</span>
+          <span className="elo-diff-val">
+            {eloFavorsA
+              ? `+${eloDiff} ${team_a.name}`
+              : `+${Math.abs(eloDiff)} ${team_b.name}`}
           </span>
         </div>
       </div>
 
-      {/* 3-Way Probability Battle Cards */}
+      {/* 3-Way Probability Breakdown */}
       <div className="prob-battle-grid">
-        {/* Team A Win Card */}
+        {/* Team A Win */}
         <div
-          className={`prob-outcome-card home-win ${homePct >= awayPct && homePct >= drawPct ? 'favorite' : ''}`}
-          style={{ '--accent-color': metaA.primaryColor }}
+          className={`prob-outcome-card ${
+            homePct >= awayPct && homePct >= drawPct ? 'favorite' : ''
+          }`}
+          style={{ '--outcome-accent': metaA.primaryColor }}
         >
           <div className="outcome-top">
             <span className="outcome-role">HOME WIN</span>
@@ -60,29 +64,34 @@ export default function ProbabilityDisplay({ prediction }) {
           </div>
           <div className="outcome-team-name">{team_a.name}</div>
           <div className="outcome-season-sub">{team_a.season}</div>
-          <div className="outcome-percent-huge" style={{ color: 'var(--epl-green)' }}>
-            {homePct}%
-          </div>
-          <div className="outcome-elo-badge">Elo: {Math.round(team_a.elo_rating)}</div>
+          <div className="outcome-percent-huge">{homePct}%</div>
+          <div className="outcome-elo-badge">Elo {Math.round(team_a.elo_rating)}</div>
         </div>
 
-        {/* Draw Card */}
-        <div className={`prob-outcome-card draw-card ${drawPct >= homePct && drawPct >= awayPct ? 'favorite' : ''}`}>
+        {/* Draw */}
+        <div
+          className={`prob-outcome-card draw-card ${
+            drawPct >= homePct && drawPct >= awayPct ? 'favorite' : ''
+          }`}
+        >
           <div className="outcome-top">
-            <span className="outcome-role">STALEMATE</span>
+            <span className="outcome-role">DRAW</span>
+            {drawPct >= homePct && drawPct >= awayPct && (
+              <span className="fav-badge">FAVORITE</span>
+            )}
           </div>
           <div className="outcome-team-name">Draw</div>
-          <div className="outcome-season-sub">90 Min Parity</div>
-          <div className="outcome-percent-huge draw-percent">
-            {drawPct}%
-          </div>
+          <div className="outcome-season-sub">Full Time Parity</div>
+          <div className="outcome-percent-huge draw-percent">{drawPct}%</div>
           <div className="outcome-elo-badge">Poisson Overlap</div>
         </div>
 
-        {/* Team B Win Card */}
+        {/* Team B Win */}
         <div
-          className={`prob-outcome-card away-win ${awayPct >= homePct && awayPct >= drawPct ? 'favorite' : ''}`}
-          style={{ '--accent-color': metaB.primaryColor }}
+          className={`prob-outcome-card ${
+            awayPct >= homePct && awayPct >= drawPct ? 'favorite' : ''
+          }`}
+          style={{ '--outcome-accent': metaB.primaryColor }}
         >
           <div className="outcome-top">
             <span className="outcome-role">AWAY WIN</span>
@@ -92,19 +101,21 @@ export default function ProbabilityDisplay({ prediction }) {
           </div>
           <div className="outcome-team-name">{team_b.name}</div>
           <div className="outcome-season-sub">{team_b.season}</div>
-          <div className="outcome-percent-huge" style={{ color: 'var(--epl-magenta)' }}>
-            {awayPct}%
-          </div>
-          <div className="outcome-elo-badge">Elo: {Math.round(team_b.elo_rating)}</div>
+          <div className="outcome-percent-huge">{awayPct}%</div>
+          <div className="outcome-elo-badge">Elo {Math.round(team_b.elo_rating)}</div>
         </div>
       </div>
 
-      {/* Segmented Momentum Bar */}
+      {/* Segmented Horizontal Meter */}
       <div className="prob-meter-wrapper">
         <div className="prob-meter-labels">
-          <span style={{ color: 'var(--epl-green)' }}>{team_a.name} ({homePct}%)</span>
-          <span style={{ color: '#94a3b8' }}>Draw ({drawPct}%)</span>
-          <span style={{ color: 'var(--epl-magenta)' }}>{team_b.name} ({awayPct}%)</span>
+          <span className="meter-label-left">
+            {team_a.name} ({homePct}%)
+          </span>
+          <span className="meter-label-center">Draw ({drawPct}%)</span>
+          <span className="meter-label-right">
+            {team_b.name} ({awayPct}%)
+          </span>
         </div>
         <div className="prob-bar-container">
           <div className="prob-bar home-bar" style={{ width: `${homePct}%` }} />
@@ -113,21 +124,21 @@ export default function ProbabilityDisplay({ prediction }) {
         </div>
       </div>
 
-      {/* Stadium LED Scoreboard */}
+      {/* Modeled Scoreline / xG Panel */}
       {hasExpectedGoals && (
         <div className="scoreboard-panel">
           <div className="scoreboard-header">
-            <span className="scoreboard-title">🏟️ DIXON-COLES MODELED SCORELINE</span>
-            <span className="live-tag">EXPECTED GOALS (xG PROJECTION)</span>
+            <span className="scoreboard-title">DIXON-COLES EXPECTED GOALS (xG)</span>
+            <span className="scoreboard-model-tag">Bivariate Poisson Mean</span>
           </div>
           <div className="scoreboard-display">
             <div className="scoreboard-team-box home-side">
               <span className="score-team-name">{team_a.name}</span>
               <span className="score-season-label">{team_a.season}</span>
             </div>
-            <div className="scoreboard-digits">
+            <div className="scoreboard-digits-container">
               <span className="score-num">{predicted_home_goals.toFixed(2)}</span>
-              <span className="score-divider">:</span>
+              <span className="score-divider">-</span>
               <span className="score-num">{predicted_away_goals.toFixed(2)}</span>
             </div>
             <div className="scoreboard-team-box away-side">

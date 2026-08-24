@@ -25,14 +25,12 @@ export default function App() {
   const [teamB, setTeamB] = useState('Arsenal');
   const [seasonB, setSeasonB] = useState('2025-2026');
 
-  // Prediction state
+  // Unified simulation state
   const [prediction, setPrediction] = useState(null);
-  const [loadingPredict, setLoadingPredict] = useState(false);
-  const [predictError, setPredictError] = useState(null);
-
-  // Explanation state
   const [explanation, setExplanation] = useState(null);
-  const [loadingExplanation, setLoadingExplanation] = useState(false);
+  const [loadingSimulation, setLoadingSimulation] = useState(false);
+  const [simulationPhase, setSimulationPhase] = useState(0);
+  const [predictError, setPredictError] = useState(null);
 
   // Load initial teams and team seasons
   useEffect(() => {
@@ -54,16 +52,30 @@ export default function App() {
     loadInitialData();
   }, []);
 
+  // Multi-phase simulation status cycler during active simulation
+  useEffect(() => {
+    if (!loadingSimulation) {
+      setSimulationPhase(0);
+      return;
+    }
+    const timer1 = setTimeout(() => setSimulationPhase(1), 600);
+    const timer2 = setTimeout(() => setSimulationPhase(2), 1400);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [loadingSimulation]);
+
   const handlePredict = useCallback(async () => {
-    if (!teamA || !seasonA || !teamB || !seasonB) return;
+    if (!teamA || !seasonA || !teamB || !seasonB || loadingSimulation) return;
 
     try {
-      setLoadingPredict(true);
+      setLoadingSimulation(true);
       setPredictError(null);
-      setPrediction(null);
-      setExplanation(null);
+      setSimulationPhase(0);
 
-      // 1. Calculate statistical prediction immediately
+      // 1. Calculate statistical probabilities and Elo
       const predRes = await predictMatchup({
         team_a_id: teamA,
         team_a_season: seasonA,
@@ -71,32 +83,29 @@ export default function App() {
         team_b_season: seasonB,
       });
 
-      // Render probabilities & statistical prediction immediately
-      setPrediction(predRes);
-      setLoadingPredict(false);
-
-      // 2. Fetch Layer 2 explanation separately (non-blocking)
+      // 2. Concurrently fetch LLM tactical explanation before revealing full dashboard
+      let expRes = null;
       if (predRes && predRes.prediction_id) {
-        setLoadingExplanation(true);
         try {
-          const expRes = await fetchExplanation(predRes.prediction_id);
-          setExplanation(expRes);
+          expRes = await fetchExplanation(predRes.prediction_id);
         } catch (expErr) {
-          // Graceful handling of LLM failure without crashing prediction
-          setExplanation({
+          expRes = {
             prediction_id: predRes.prediction_id,
             narrative_available: false,
-            status_message: 'LLM explanation service is unconfigured or unavailable. Statistical prediction remains fully valid.',
-          });
-        } finally {
-          setLoadingExplanation(false);
+            status_message: 'Tactical narrative service unavailable. Statistical prediction remains fully valid.',
+          };
         }
       }
+
+      // 3. Synchronously reveal both prediction results and LLM explanation together
+      setPrediction(predRes);
+      setExplanation(expRes);
     } catch (err) {
-      setPredictError(err.message || 'Prediction failed');
-      setLoadingPredict(false);
+      setPredictError(err.message || 'Prediction simulation failed');
+    } finally {
+      setLoadingSimulation(false);
     }
-  }, [teamA, seasonA, teamB, seasonB]);
+  }, [teamA, seasonA, teamB, seasonB, loadingSimulation]);
 
   if (loadingInit) {
     return (
@@ -104,7 +113,8 @@ export default function App() {
         <Header />
         <main className="main-content">
           <div className="card loading-card">
-            <p>Loading Premier League teams and historical data...</p>
+            <div className="loading-spinner"></div>
+            <p>Loading historical Premier League database...</p>
           </div>
         </main>
       </div>
@@ -117,13 +127,19 @@ export default function App() {
         <Header />
         <main className="main-content">
           <div className="card error-card">
-            <h3>Error Loading Application</h3>
+            <h3>Error Loading Historical Database</h3>
             <p>{initError}</p>
           </div>
         </main>
       </div>
     );
   }
+
+  const phaseMessages = [
+    'Computing Bivariate Poisson goal distribution & era-adjusted Elo ratings...',
+    'Evaluating era tactical differentials, pressing metrics, and squad features...',
+    'Synthesizing pundit tactical report and matchup breakdown...',
+  ];
 
   return (
     <div className="app-container">
@@ -141,7 +157,7 @@ export default function App() {
           seasonB={seasonB}
           setSeasonB={setSeasonB}
           onPredict={handlePredict}
-          loading={loadingPredict}
+          loading={loadingSimulation}
         />
 
         {predictError && (
@@ -151,7 +167,36 @@ export default function App() {
           </div>
         )}
 
-        {prediction && (
+        {/* Dedicated Loading State while simulation is in flight */}
+        {loadingSimulation && (
+          <div className="card simulation-loader-card">
+            <div className="sim-loader-header">
+              <div className="sim-pulse-dot"></div>
+              <span className="sim-loader-tag">CROSS-ERA SIMULATION IN PROGRESS</span>
+            </div>
+            <h3 className="sim-loader-title">
+              Simulating {teamA} ({seasonA}) vs {teamB} ({seasonB})
+            </h3>
+            <p className="sim-loader-status">{phaseMessages[simulationPhase]}</p>
+            <div className="sim-progress-track">
+              <div className="sim-progress-fill" />
+            </div>
+            <div className="sim-steps-row">
+              <span className={`sim-step ${simulationPhase >= 0 ? 'step-active' : ''}`}>
+                1. Elo & Poisson Model
+              </span>
+              <span className={`sim-step ${simulationPhase >= 1 ? 'step-active' : ''}`}>
+                2. Tactical Factors
+              </span>
+              <span className={`sim-step ${simulationPhase >= 2 ? 'step-active' : ''}`}>
+                3. Tactical Breakdown
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Results Container: Revealed only after the entire simulation completes */}
+        {!loadingSimulation && prediction && (
           <div className="results-container">
             <DataHonestyBadge reducedConfidence={prediction.reduced_confidence} />
             <ProbabilityDisplay prediction={prediction} />
@@ -162,7 +207,7 @@ export default function App() {
             />
             <ExplanationNarratives
               explanation={explanation}
-              loading={loadingExplanation}
+              loading={false}
               teamA={prediction.team_a}
               teamB={prediction.team_b}
             />

@@ -4,17 +4,14 @@ import { getTeamMeta } from '../utils/teamMetadata';
 export default function FeatureAttribution({ features, teamA, teamB }) {
   if (!features || features.length === 0) return null;
 
-  const metaA = getTeamMeta(teamA.name);
-  const metaB = getTeamMeta(teamB.name);
-
   return (
-    <div className="card features-card glass-panel">
+    <div className="card features-card">
       <div className="card-header-bar">
         <div>
-          <span className="card-tag">STATISTICAL COMPARISON</span>
-          <h3 className="card-title">Key Match Drivers & Metrics</h3>
+          <span className="card-tag">STATISTICAL FACTORS</span>
+          <h3 className="card-title">Key Match Drivers</h3>
         </div>
-        <span className="drivers-count">{features.length} Factors Analyzed</span>
+        <span className="drivers-count">{features.length} Indicators Evaluated</span>
       </div>
 
       <div className="features-battle-list">
@@ -25,9 +22,10 @@ export default function FeatureAttribution({ features, teamA, teamB }) {
 
           let formattedVal = feat.feature_value !== null ? feat.feature_value : 'N/A';
           if (typeof feat.feature_value === 'number') {
-            formattedVal = feat.feature_value > 100 
-              ? Math.round(feat.feature_value) 
-              : feat.feature_value.toFixed(2);
+            formattedVal =
+              feat.feature_value > 100
+                ? Math.round(feat.feature_value)
+                : feat.feature_value.toFixed(2);
           }
 
           return (
@@ -37,33 +35,35 @@ export default function FeatureAttribution({ features, teamA, teamB }) {
                   {feat.description || feat.feature_name.replace(/_/g, ' ')}
                 </span>
                 <span className="feature-raw-val">
-                  Value: <span className="val-bold">{formattedVal}</span>
+                  Differential: <span className="val-bold">{formattedVal}</span>
                 </span>
               </div>
 
-              {/* Tug-of-war indicator bar */}
+              {/* Comparative Indicator */}
               <div className="tug-of-war-container">
                 <div className="tug-side team-a-side">
-                  <span className="side-team-label" style={{ color: isFavorsA ? 'var(--epl-green)' : 'var(--text-muted)' }}>
+                  <span
+                    className={`side-team-label ${isFavorsA ? 'label-active' : ''}`}
+                  >
                     {teamA.name}
                   </span>
                   <div className="tug-bar-track left-track">
                     <div
                       className={`tug-bar-fill left-fill ${isFavorsA ? 'active' : ''}`}
-                      style={{ width: isFavorsA ? '100%' : '20%' }}
+                      style={{ width: isFavorsA ? '100%' : '15%' }}
                     />
                   </div>
                 </div>
 
                 <div className="tug-center-badge">
                   {isFavorsA && (
-                    <span className="tilt-badge tilt-a">← Favors {teamA.name}</span>
+                    <span className="tilt-badge tilt-a">Favors {teamA.name}</span>
                   )}
                   {isFavorsB && (
-                    <span className="tilt-badge tilt-b">Favors {teamB.name} →</span>
+                    <span className="tilt-badge tilt-b">Favors {teamB.name}</span>
                   )}
                   {isNeutral && (
-                    <span className="tilt-badge tilt-neutral">Balanced</span>
+                    <span className="tilt-badge tilt-neutral">Neutral</span>
                   )}
                 </div>
 
@@ -71,10 +71,12 @@ export default function FeatureAttribution({ features, teamA, teamB }) {
                   <div className="tug-bar-track right-track">
                     <div
                       className={`tug-bar-fill right-fill ${isFavorsB ? 'active' : ''}`}
-                      style={{ width: isFavorsB ? '100%' : '20%' }}
+                      style={{ width: isFavorsB ? '100%' : '15%' }}
                     />
                   </div>
-                  <span className="side-team-label" style={{ color: isFavorsB ? 'var(--epl-magenta)' : 'var(--text-muted)' }}>
+                  <span
+                    className={`side-team-label ${isFavorsB ? 'label-active' : ''}`}
+                  >
                     {teamB.name}
                   </span>
                 </div>

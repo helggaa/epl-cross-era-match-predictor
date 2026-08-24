@@ -7,14 +7,13 @@ export const TEAM_METADATA = {
     accentColor: '#9C824A',
     short: 'ARS',
     stadium: 'Emirates Stadium / Highbury',
-    emoji: '🔴',
     seasons: {
-      '2003-2004': 'The Invincibles 🛡️',
-      '1997-1998': 'Wenger Double 🏆',
-      '2001-2002': 'Double Winners 👑',
-      '2022-2023': 'Arteta Title Charge ⚡',
-      '2023-2024': '89 Pts Contenders 🎯',
-      '2025-2026': 'Current Era 🔴',
+      '2003-2004': 'The Invincibles (Undefeated Champions)',
+      '1997-1998': 'Wenger League & FA Cup Double',
+      '2001-2002': 'Double Winners',
+      '2022-2023': '84 Pts Title Contenders',
+      '2023-2024': '89 Pts Runners-up',
+      '2025-2026': 'Current Season',
     }
   },
   'Liverpool': {
@@ -23,13 +22,12 @@ export const TEAM_METADATA = {
     accentColor: '#F6EB61',
     short: 'LIV',
     stadium: 'Anfield',
-    emoji: '🔴',
     seasons: {
-      '2019-2020': '99 Pts Champions 🏆',
-      '2018-2019': '97 Pts & UCL Winners 🌟',
-      '2021-2022': '92 Pts Quad Hunt 🔥',
-      '2013-2014': 'Suarez 31 Goals SAS ⚡',
-      '2008-2009': 'Torres & Gerrard Era 💥',
+      '2019-2020': '99 Pts Premier League Champions',
+      '2018-2019': '97 Pts & European Champions',
+      '2021-2022': '92 Pts Season',
+      '2013-2014': '101 Goals Scored SAS Campaign',
+      '2008-2009': 'Torres & Gerrard Runners-up',
     }
   },
   'Manchester City': {
@@ -38,14 +36,13 @@ export const TEAM_METADATA = {
     accentColor: '#FFC659',
     short: 'MCI',
     stadium: 'Etihad Stadium',
-    emoji: '🩵',
     seasons: {
-      '2017-2018': '100 Pts Centurions 💯',
-      '2018-2019': '98 Pts Domestic Treble 👑',
-      '2022-2023': 'Continental Treble 🏆',
-      '2023-2024': 'Historic 4-in-a-Row 🌟',
-      '2011-2012': '93:20 Aguero Title ⚡',
-      '2013-2014': 'Pellegrini 102 Goals ⚽',
+      '2017-2018': '100 Pts Centurions',
+      '2018-2019': '98 Pts Domestic Treble',
+      '2022-2023': 'Continental Treble Champions',
+      '2023-2024': 'Historic 4-in-a-Row Champions',
+      '2011-2012': 'Aguero 93:20 Title Season',
+      '2013-2014': '102 Goals Title Season',
     }
   },
   'Man City': {
@@ -54,14 +51,13 @@ export const TEAM_METADATA = {
     accentColor: '#FFC659',
     short: 'MCI',
     stadium: 'Etihad Stadium',
-    emoji: '🩵',
     seasons: {
-      '2017-2018': '100 Pts Centurions 💯',
-      '2018-2019': '98 Pts Domestic Treble 👑',
-      '2022-2023': 'Continental Treble 🏆',
-      '2023-2024': 'Historic 4-in-a-Row 🌟',
-      '2011-2012': '93:20 Aguero Title ⚡',
-      '2025-2026': 'Pep Era 🩵',
+      '2017-2018': '100 Pts Centurions',
+      '2018-2019': '98 Pts Domestic Treble',
+      '2022-2023': 'Continental Treble Champions',
+      '2023-2024': 'Historic 4-in-a-Row Champions',
+      '2011-2012': 'Aguero 93:20 Title Season',
+      '2025-2026': 'Current Season',
     }
   },
   'Manchester United': {
@@ -70,14 +66,13 @@ export const TEAM_METADATA = {
     accentColor: '#000000',
     short: 'MUN',
     stadium: 'Old Trafford',
-    emoji: '🔴',
     seasons: {
-      '1998-1999': 'Historic Treble 👑',
-      '2007-2008': 'Ronaldo 42G & UCL ⚡',
-      '1993-1994': 'Cantona Double 🏆',
-      '1999-2000': '97 Goals Title 🌟',
-      '2006-2007': 'Rooney & Ronaldo 💥',
-      '2012-2013': 'Fergie Last Dance (RVP) 🏅',
+      '1998-1999': 'Historic Treble Season',
+      '2007-2008': 'Ronaldo 42-Goal & UCL Double',
+      '1993-1994': 'Cantona League & Cup Double',
+      '1999-2000': '97 Goals Title Campaign',
+      '2006-2007': 'Rooney & Ronaldo Champions',
+      '2012-2013': 'Ferguson 13th Title (Van Persie)',
     }
   },
   'Man United': {
@@ -86,14 +81,13 @@ export const TEAM_METADATA = {
     accentColor: '#000000',
     short: 'MUN',
     stadium: 'Old Trafford',
-    emoji: '🔴',
     seasons: {
-      '1998-1999': 'Historic Treble 👑',
-      '2007-2008': 'Ronaldo 42G & UCL ⚡',
-      '1993-1994': 'Cantona Double 🏆',
-      '1999-2000': '97 Goals Title 🌟',
-      '2006-2007': 'Rooney & Ronaldo 💥',
-      '2012-2013': 'Fergie Last Dance (RVP) 🏅',
+      '1998-1999': 'Historic Treble Season',
+      '2007-2008': 'Ronaldo 42-Goal & UCL Double',
+      '1993-1994': 'Cantona League & Cup Double',
+      '1999-2000': '97 Goals Title Campaign',
+      '2006-2007': 'Rooney & Ronaldo Champions',
+      '2012-2013': 'Ferguson 13th Title (Van Persie)',
     }
   },
   'Chelsea': {
@@ -102,13 +96,12 @@ export const TEAM_METADATA = {
     accentColor: '#DBA111',
     short: 'CHE',
     stadium: 'Stamford Bridge',
-    emoji: '🔵',
     seasons: {
-      '2004-2005': '15-Goal Record Defense 🧱',
-      '2005-2006': 'Back-to-Back Title 🏆',
-      '2009-2010': 'Ancelotti 103 Goals ⚽',
-      '2014-2015': 'Jose Second Stint Title 🏅',
-      '2016-2017': 'Conte 30-Win 3-4-3 ⚡',
+      '2004-2005': '15 Goals Conceded Record Defense',
+      '2005-2006': 'Back-to-Back Title Champions',
+      '2009-2010': 'Ancelotti 103 Goals Record',
+      '2014-2015': 'Mourinho Title Champions',
+      '2016-2017': 'Conte 30-Win 3-4-3 Title',
     }
   },
   'Tottenham Hotspur': {
@@ -117,11 +110,10 @@ export const TEAM_METADATA = {
     accentColor: '#7F9BB8',
     short: 'TOT',
     stadium: 'Tottenham Hotspur Stadium',
-    emoji: '⚪',
     seasons: {
-      '2016-2017': '86 Pts Undefeated Home ⚡',
-      '2015-2016': 'Pochettino Title Race 🎯',
-      '2018-2019': 'Champions League Final 🌟',
+      '2016-2017': '86 Pts Undefeated Home Record',
+      '2015-2016': 'Pochettino Title Contenders',
+      '2018-2019': 'Champions League Finalists',
     }
   },
   'Newcastle United': {
@@ -130,11 +122,10 @@ export const TEAM_METADATA = {
     accentColor: '#F1BE48',
     short: 'NEW',
     stadium: 'St James\' Park',
-    emoji: '⚫',
     seasons: {
-      '1995-1996': 'Keegan "The Entertainers" 🎪',
-      '2001-2002': 'Sir Bobby Robson Era 🌟',
-      '2022-2023': 'Champions League Return ⚡',
+      '1995-1996': 'Keegan "The Entertainers"',
+      '2001-2002': 'Sir Bobby Robson Campaign',
+      '2022-2023': 'Champions League Qualification',
     }
   },
   'Aston Villa': {
@@ -143,10 +134,9 @@ export const TEAM_METADATA = {
     accentColor: '#FEE12B',
     short: 'AVL',
     stadium: 'Villa Park',
-    emoji: '🟣',
     seasons: {
-      '2023-2024': 'Emery UCL Qualification 🌟',
-      '1992-1993': 'Inaugural Title Runners-up 🥈',
+      '2023-2024': 'Emery Top 4 Qualification',
+      '1992-1993': 'Inaugural Title Runners-up',
     }
   },
   'Leicester City': {
@@ -155,10 +145,9 @@ export const TEAM_METADATA = {
     accentColor: '#FFFFFF',
     short: 'LEI',
     stadium: 'King Power Stadium',
-    emoji: '🦊',
     seasons: {
-      '2015-2016': '5000-1 Fairy Tale Miracle 🏆',
-      '2019-2020': 'Rodgers 5th & Vardy Golden Boot ⚽',
+      '2015-2016': '5000-1 Title Winning Campaign',
+      '2019-2020': 'Vardy Golden Boot Season',
     }
   },
   'Blackburn Rovers': {
@@ -167,9 +156,8 @@ export const TEAM_METADATA = {
     accentColor: '#FFFFFF',
     short: 'BLA',
     stadium: 'Ewood Park',
-    emoji: '🔵',
     seasons: {
-      '1994-1995': 'Shearer & Sutton SAS Title 🏆',
+      '1994-1995': 'Shearer & Sutton SAS Title',
     }
   }
 };
@@ -178,8 +166,8 @@ export const PRESET_MATCHUPS = [
   {
     id: 'invincibles-vs-centurions',
     title: 'The Invincibles vs The Centurions',
-    subtitle: 'Wenger 03-04 vs Pep 17-18',
-    badge: '🏆 All-Time Greats',
+    subtitle: 'Arsenal 03-04 vs Man City 17-18',
+    badge: 'All-Time Greats',
     teamA: 'Arsenal',
     seasonA: '2003-2004',
     teamB: 'Man City',
@@ -187,9 +175,9 @@ export const PRESET_MATCHUPS = [
   },
   {
     id: 'treble-clash',
-    title: 'Fergie Treble vs Haaland Treble',
+    title: 'Fergie Treble vs Pep Treble',
     subtitle: 'Man United 98-99 vs Man City 22-23',
-    badge: '👑 Treble Royale',
+    badge: 'Treble Winners',
     teamA: 'Man United',
     seasonA: '1998-1999',
     teamB: 'Man City',
@@ -197,9 +185,9 @@ export const PRESET_MATCHUPS = [
   },
   {
     id: 'fortress-clash',
-    title: '15-Goal Defense vs Klopp Champions',
+    title: '15-Goal Defense vs 99 Pts Attack',
     subtitle: 'Chelsea 04-05 vs Liverpool 19-20',
-    badge: '🧱 Unstoppable vs Immovable',
+    badge: 'Defense vs Attack',
     teamA: 'Chelsea',
     seasonA: '2004-2005',
     teamB: 'Liverpool',
@@ -209,7 +197,7 @@ export const PRESET_MATCHUPS = [
     id: 'miracle-vs-invincible',
     title: '5000-1 Miracle vs The Invincibles',
     subtitle: 'Leicester 15-16 vs Arsenal 03-04',
-    badge: '🦊 Fairy Tale Clash',
+    badge: 'Fairy Tale vs Invincibles',
     teamA: 'Leicester City',
     seasonA: '2015-2016',
     teamB: 'Arsenal',
@@ -219,7 +207,7 @@ export const PRESET_MATCHUPS = [
     id: 'ronaldo-vs-suarez',
     title: 'Ronaldo Double vs Suarez SAS',
     subtitle: 'Man United 07-08 vs Liverpool 13-14',
-    badge: '⚡ Peak Individual Era',
+    badge: 'Peak Individual Eras',
     teamA: 'Man United',
     seasonA: '2007-2008',
     teamB: 'Liverpool',
@@ -228,20 +216,18 @@ export const PRESET_MATCHUPS = [
 ];
 
 export function getTeamMeta(teamName) {
-  if (!teamName) return { primaryColor: '#3b82f6', secondaryColor: '#1e293b', short: 'PL', emoji: '⚽' };
-  // Search direct or partial
+  if (!teamName) return { primaryColor: '#2563eb', secondaryColor: '#1e293b', short: 'PL' };
   for (const [name, meta] of Object.entries(TEAM_METADATA)) {
     if (teamName.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(teamName.toLowerCase())) {
       return meta;
     }
   }
   return {
-    primaryColor: '#38003c',
-    secondaryColor: '#1e293b',
-    accentColor: '#00ff85',
+    primaryColor: '#1e293b',
+    secondaryColor: '#0f172a',
+    accentColor: '#38bdf8',
     short: teamName.slice(0, 3).toUpperCase(),
     stadium: 'Premier League Ground',
-    emoji: '⚽',
     seasons: {}
   };
 }
@@ -252,7 +238,7 @@ export function getSeasonNickname(teamName, season) {
     return meta.seasons[season];
   }
   const year = parseInt(season?.split('-')[0] || '2000', 10);
-  if (year >= 2014) return 'Modern xG Era ⚡';
-  if (year >= 2000) return 'Millennium PL Era 🛡️';
-  return 'Classic 90s Era 📼';
+  if (year >= 2017) return 'Modern Tactical Era';
+  if (year >= 2004) return 'Post-Invincibles Era';
+  return 'Early Premier League Era';
 }

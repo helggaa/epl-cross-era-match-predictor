@@ -3,27 +3,27 @@ import { getTeamMeta } from '../utils/teamMetadata';
 
 function parseReasonTag(text) {
   const lower = text.toLowerCase();
-  if (lower.includes('press') || lower.includes('tactic') || lower.includes('system') || lower.includes('block')) {
-    return { tag: '🧠 TACTICAL EDGE', className: 'tag-tactical' };
+  if (lower.includes('press') || lower.includes('tactic') || lower.includes('system') || lower.includes('block') || lower.includes('formation')) {
+    return { tag: 'Tactical System', className: 'tag-tactical' };
   }
-  if (lower.includes('defense') || lower.includes('clean sheet') || lower.includes('conceded') || lower.includes('backline')) {
-    return { tag: '🛡️ DEFENSE', className: 'tag-defense' };
+  if (lower.includes('defense') || lower.includes('clean sheet') || lower.includes('conceded') || lower.includes('backline') || lower.includes('keeper')) {
+    return { tag: 'Defensive Record', className: 'tag-defense' };
   }
-  if (lower.includes('attack') || lower.includes('goal') || lower.includes('salah') || lower.includes('haaland') || lower.includes('henry') || lower.includes('ronaldo') || lower.includes('xg')) {
-    return { tag: '⚡ ATTACK POWER', className: 'tag-attack' };
+  if (lower.includes('attack') || lower.includes('goal') || lower.includes('salah') || lower.includes('haaland') || lower.includes('henry') || lower.includes('ronaldo') || lower.includes('xg') || lower.includes('finishing')) {
+    return { tag: 'Attacking Threat', className: 'tag-attack' };
   }
-  if (lower.includes('anfield') || lower.includes('home') || lower.includes('crowd') || lower.includes('stadium')) {
-    return { tag: '🏟️ HOME FORTRESS', className: 'tag-venue' };
+  if (lower.includes('anfield') || lower.includes('home') || lower.includes('crowd') || lower.includes('stadium') || lower.includes('fortress')) {
+    return { tag: 'Venue & Pitch', className: 'tag-venue' };
   }
-  if (lower.includes('meme') || lower.includes('bottle') || lower.includes('fraud') || lower.includes('bus') || lower.includes('banter')) {
-    return { tag: '🎭 BANTER / MEME', className: 'tag-banter' };
+  if (lower.includes('experience') || lower.includes('clutch') || lower.includes('mentality') || lower.includes('streak') || lower.includes('title')) {
+    return { tag: 'Era Dynamics', className: 'tag-era' };
   }
-  return { tag: '📌 KEY FACTOR', className: 'tag-general' };
+  return { tag: 'Key Factor', className: 'tag-general' };
 }
 
 function ReasonList({ reasons, type = 'win' }) {
   if (!reasons || reasons.length === 0) {
-    return <p className="no-reasons">No tactical breakdowns provided for this section.</p>;
+    return <p className="no-reasons">No tactical points available for this section.</p>;
   }
 
   return (
@@ -31,10 +31,13 @@ function ReasonList({ reasons, type = 'win' }) {
       {reasons.map((reason, idx) => {
         const { tag, className } = parseReasonTag(reason);
         return (
-          <div key={idx} className={`reason-tactical-card ${type === 'win' ? 'win-theme' : 'lose-theme'}`}>
+          <div
+            key={idx}
+            className={`reason-tactical-card ${type === 'win' ? 'win-theme' : 'lose-theme'}`}
+          >
             <div className="reason-card-top">
               <span className={`reason-category-tag ${className}`}>{tag}</span>
-              <span className="reason-idx">#{idx + 1}</span>
+              <span className="reason-idx">{idx + 1}</span>
             </div>
             <p className="reason-text">{reason}</p>
           </div>
@@ -53,16 +56,13 @@ export default function ExplanationNarratives({ explanation, loading, teamA, tea
 
   if (loading) {
     return (
-      <div className="card explanation-card loading-state glass-panel">
+      <div className="card explanation-card loading-state">
         <div className="pundit-loading-wrapper">
-          <div className="pulsing-mic">🎙️</div>
-          <h3 className="loading-title">Studio Pundit AI Analysis In Progress</h3>
+          <div className="loading-spinner"></div>
+          <h3 className="loading-title">Generating Tactical Matchup Analysis</h3>
           <p className="loading-sub">
-            Analyzing {teamA.name} ({teamA.season}) vs {teamB.name} ({teamB.season}) tactical matchups, historical data, and memes...
+            Evaluating historical data, tactical frameworks, and matchup drivers for {teamA.name} ({teamA.season}) vs {teamB.name} ({teamB.season})...
           </p>
-          <div className="loading-progress-bar">
-            <div className="progress-fill" />
-          </div>
         </div>
       </div>
     );
@@ -72,20 +72,19 @@ export default function ExplanationNarratives({ explanation, loading, teamA, tea
 
   if (!explanation.narrative_available || !explanation.narratives) {
     return (
-      <div className="card explanation-card fallback-state glass-panel">
+      <div className="card explanation-card fallback-state">
         <div className="card-header-bar">
           <div>
-            <span className="card-tag">AI ANALYSIS</span>
-            <h3 className="card-title">🎙️ Pundit Studio Breakdown</h3>
+            <span className="card-tag">TACTICAL REPORT</span>
+            <h3 className="card-title">Tactical Breakdown</h3>
           </div>
         </div>
         <div className="fallback-banner">
-          <span className="fallback-icon">ℹ️</span>
           <div className="fallback-content">
             <strong>Statistical Prediction Active</strong>
             <p className="fallback-message">
               {explanation.status_message ||
-                'LLM explanation service is unconfigured or unavailable. The statistical prediction above remains 100% valid.'}
+                'Tactical narrative generation is unavailable. The statistical and Elo predictions remain active and calibrated.'}
             </p>
           </div>
         </div>
@@ -96,43 +95,42 @@ export default function ExplanationNarratives({ explanation, loading, teamA, tea
   const { narratives } = explanation;
 
   const handleCopyAnalysis = () => {
-    const textToCopy = `🏆 EPL Cross-Era Clash: ${teamA.name} (${teamA.season}) vs ${teamB.name} (${teamB.season})
-    
-✅ Why ${teamA.name} Wins:
-${narratives.why_team_a_wins.map((r, i) => `• ${r}`).join('\n')}
+    const textToCopy = `Premier League Cross-Era Analysis: ${teamA.name} (${teamA.season}) vs ${teamB.name} (${teamB.season})
 
-❌ Why ${teamA.name} Struggles:
-${narratives.why_team_a_loses.map((r, i) => `• ${r}`).join('\n')}
+Why ${teamA.name} Can Win:
+${narratives.why_team_a_wins.map((r, i) => `${i + 1}. ${r}`).join('\n')}
 
-✅ Why ${teamB.name} Wins:
-${narratives.why_team_b_wins.map((r, i) => `• ${r}`).join('\n')}
+Vulnerabilities for ${teamA.name}:
+${narratives.why_team_a_loses.map((r, i) => `${i + 1}. ${r}`).join('\n')}
 
-❌ Why ${teamB.name} Struggles:
-${narratives.why_team_b_loses.map((r, i) => `• ${r}`).join('\n')}`;
+Why ${teamB.name} Can Win:
+${narratives.why_team_b_wins.map((r, i) => `${i + 1}. ${r}`).join('\n')}
+
+Vulnerabilities for ${teamB.name}:
+${narratives.why_team_b_loses.map((r, i) => `${i + 1}. ${r}`).join('\n')}`;
 
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="card explanation-card glass-panel">
-      {/* Studio Header */}
+    <div className="card explanation-card">
+      {/* Header */}
       <div className="card-header-bar">
         <div>
-          <span className="card-tag">AI PUNDIT STUDIO ANALYSIS</span>
-          <h3 className="card-title">🎙️ Tactical & Cultural Breakdown</h3>
+          <span className="card-tag">TACTICAL REPORT</span>
+          <h3 className="card-title">Matchup Breakdown & Tactical Context</h3>
         </div>
 
         <div className="header-actions">
-          {/* View Tab Buttons */}
           <div className="studio-tabs">
             <button
               type="button"
               className={`tab-btn ${activeTab === 'both' ? 'active' : ''}`}
               onClick={() => setActiveTab('both')}
             >
-              ⚔️ Side-by-Side
+              Side-by-Side
             </button>
             <button
               type="button"
@@ -154,23 +152,26 @@ ${narratives.why_team_b_loses.map((r, i) => `• ${r}`).join('\n')}`;
             type="button"
             className="btn-copy-analysis"
             onClick={handleCopyAnalysis}
-            title="Copy tactical breakdown to clipboard"
+            title="Copy breakdown text"
           >
-            {copied ? '✓ Copied!' : '📋 Share'}
+            {copied ? 'Copied' : 'Copy Summary'}
           </button>
         </div>
       </div>
 
-      {/* Two-Column or Filtered Tactical Board */}
+      {/* Breakdown Columns */}
       <div className={`narratives-layout-container layout-${activeTab}`}>
         {/* Team A Column */}
         {(activeTab === 'both' || activeTab === 'teamA') && (
           <div
             className="tactical-team-column team-a-column"
-            style={{ '--club-theme': metaA.primaryColor }}
+            style={{ '--club-accent': metaA.primaryColor }}
           >
             <div className="column-club-banner">
-              <div className="club-badge-sm" style={{ backgroundColor: metaA.primaryColor }}>
+              <div
+                className="club-badge-sm"
+                style={{ backgroundColor: metaA.primaryColor }}
+              >
                 {metaA.short}
               </div>
               <div>
@@ -182,17 +183,17 @@ ${narratives.why_team_b_loses.map((r, i) => `• ${r}`).join('\n')}`;
             {/* Wins */}
             <div className="tactical-block win-block">
               <div className="tactical-block-heading win-head">
-                <span className="block-icon">🏆</span>
-                <h5>Paths to Victory ({narratives.why_team_a_wins.length} Points)</h5>
+                <span className="block-indicator win-ind"></span>
+                <h5>Key Tactical Advantages ({narratives.why_team_a_wins.length})</h5>
               </div>
               <ReasonList reasons={narratives.why_team_a_wins} type="win" />
             </div>
 
-            {/* Loses */}
+            {/* Risks */}
             <div className="tactical-block lose-block">
               <div className="tactical-block-heading lose-head">
-                <span className="block-icon">⚠️</span>
-                <h5>Vulnerabilities & Risk ({narratives.why_team_a_loses.length} Points)</h5>
+                <span className="block-indicator lose-ind"></span>
+                <h5>Matchup Vulnerabilities ({narratives.why_team_a_loses.length})</h5>
               </div>
               <ReasonList reasons={narratives.why_team_a_loses} type="lose" />
             </div>
@@ -203,10 +204,13 @@ ${narratives.why_team_b_loses.map((r, i) => `• ${r}`).join('\n')}`;
         {(activeTab === 'both' || activeTab === 'teamB') && (
           <div
             className="tactical-team-column team-b-column"
-            style={{ '--club-theme': metaB.primaryColor }}
+            style={{ '--club-accent': metaB.primaryColor }}
           >
             <div className="column-club-banner">
-              <div className="club-badge-sm" style={{ backgroundColor: metaB.primaryColor }}>
+              <div
+                className="club-badge-sm"
+                style={{ backgroundColor: metaB.primaryColor }}
+              >
                 {metaB.short}
               </div>
               <div>
@@ -218,17 +222,17 @@ ${narratives.why_team_b_loses.map((r, i) => `• ${r}`).join('\n')}`;
             {/* Wins */}
             <div className="tactical-block win-block">
               <div className="tactical-block-heading win-head">
-                <span className="block-icon">🏆</span>
-                <h5>Paths to Victory ({narratives.why_team_b_wins.length} Points)</h5>
+                <span className="block-indicator win-ind"></span>
+                <h5>Key Tactical Advantages ({narratives.why_team_b_wins.length})</h5>
               </div>
               <ReasonList reasons={narratives.why_team_b_wins} type="win" />
             </div>
 
-            {/* Loses */}
+            {/* Risks */}
             <div className="tactical-block lose-block">
               <div className="tactical-block-heading lose-head">
-                <span className="block-icon">⚠️</span>
-                <h5>Vulnerabilities & Risk ({narratives.why_team_b_loses.length} Points)</h5>
+                <span className="block-indicator lose-ind"></span>
+                <h5>Matchup Vulnerabilities ({narratives.why_team_b_loses.length})</h5>
               </div>
               <ReasonList reasons={narratives.why_team_b_loses} type="lose" />
             </div>
