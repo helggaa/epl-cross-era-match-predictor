@@ -1,9 +1,7 @@
 # EPL Cross-Era Match Predictor ⚽⚡
 
 [![Version](https://img.shields.io/badge/version-0.9.0-blue.svg)](package.json)
-[![Frontend](https://img.shields.io/badge/Live_Demo-Cloudflare_Pages-F38020?logo=cloudflare&logoColor=white)](https://epl-cross-era-match-predictor.pages.dev)
-[![Backend API](https://img.shields.io/badge/Backend_API-SnapDeploy-00C7B7?logo=fastapi&logoColor=white)](https://epl-predictor-backend-483bf.containers.snapdeploy.app/api/v1/health)
-[![API Docs](https://img.shields.io/badge/Swagger-Interactive_Docs-85EA2D?logo=swagger&logoColor=black)](https://epl-predictor-backend-483bf.containers.snapdeploy.app/docs)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Cloudflare_Pages-F38020?logo=cloudflare&logoColor=white)](https://epl-cross-era-match-predictor.pages.dev)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -13,11 +11,10 @@ A statistical machine learning simulation engine and broadcast-grade analytics d
 
 ---
 
-## 🌐 Live Deployments
+## 🌐 Live Demo
 
-- 🖥️ **Live Web Application**: [https://epl-cross-era-match-predictor.pages.dev](https://epl-cross-era-match-predictor.pages.dev)
-- 🔌 **Production Backend API**: [https://epl-predictor-backend-483bf.containers.snapdeploy.app/api/v1](https://epl-predictor-backend-483bf.containers.snapdeploy.app/api/v1)
-- 📖 **Interactive Swagger Docs**: [https://epl-predictor-backend-483bf.containers.snapdeploy.app/docs](https://epl-predictor-backend-483bf.containers.snapdeploy.app/docs)
+🚀 **Web Application**: [https://epl-cross-era-match-predictor.pages.dev](https://epl-cross-era-match-predictor.pages.dev)
+
 
 ---
 
