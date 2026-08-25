@@ -44,6 +44,7 @@ frontend/.vite/
 # Database / Storage
 *.sqlite
 *.db
+!backend/epl_predictor.db
 pgdata/
 
 # IDE / OS
