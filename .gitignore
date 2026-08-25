@@ -3,9 +3,12 @@
 .env.local
 
 # Internal / Private Documentation (Local only)
+.sdd/
 SDD_*.md
 IMPLEMENTATION_RULES.md
 llm_prompts.md
+DEPLOYMENT.md
+
 
 # Python
 __pycache__/

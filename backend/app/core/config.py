@@ -4,8 +4,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "EPL Cross-Era Match Predictor"
-    VERSION: str = "1.0.0"
+    VERSION: str = "0.9.0"
     API_V1_STR: str = "/api/v1"
+
 
     # Database: Defaults to SQLite file in backend/ directory, can be overridden by Neon/PostgreSQL DATABASE_URL
     DATABASE_URL: str = "sqlite:///./epl_predictor.db"

@@ -29,6 +29,16 @@ app.add_middleware(
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
 
 
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "message": f"Welcome to {settings.PROJECT_NAME} API",
+        "docs": "/docs",
+        "health": f"{settings.API_V1_STR}/health"
+    }
+
+
 @app.get(f"{settings.API_V1_STR}/health", response_model=HealthCheckResponse)
 def health_check(db: Session = Depends(get_db)):
     db_connected = False
@@ -44,3 +54,4 @@ def health_check(db: Session = Depends(get_db)):
         version=settings.VERSION,
         database_connected=db_connected
     )
+

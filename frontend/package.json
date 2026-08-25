@@ -1,8 +1,9 @@
 {
   "name": "epl-cross-era-match-predictor-frontend",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.9.0",
   "type": "module",
+
   "scripts": {
     "dev": "vite",
     "build": "vite build",
